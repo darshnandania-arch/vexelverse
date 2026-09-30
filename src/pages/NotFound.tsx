@@ -1,26 +1,19 @@
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { KeyRound } from "lucide-react";
+import { Link } from "react-router";
 
 export default function NotFound() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen flex flex-col"
-    >
-
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="max-w-5xl mx-auto relative px-4">
-          <div className="flex items-center justify-center min-h-[200px]">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
-              <p className="text-lg text-gray-600">Page Not Found</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+    <main className="vv-bg flex min-h-screen flex-col items-center justify-center gap-5 p-6 text-center">
+      <KeyRound className="size-10 text-gold-500/60" />
+      <h1 className="font-display text-4xl text-gold-200">This door leads nowhere</h1>
+      <p className="max-w-sm font-body text-amber-100/70">
+        The corridor you followed does not exist in the house's plans. Every
+        other one does — more or less.
+      </p>
+      <Button asChild className="bg-gold-600 font-body text-black hover:bg-gold-500">
+        <Link to="/">Back to the foyer</Link>
+      </Button>
+    </main>
   );
 }

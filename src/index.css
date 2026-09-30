@@ -42,40 +42,74 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* CHANGE VALUES FOR THEME */
+/* VexelVerse Escape — black & gold, old-timey salon theme */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.375rem;
+  --background: oklch(0.13 0.008 70);
+  --foreground: oklch(0.93 0.03 85);
+  --card: oklch(0.16 0.008 60);
+  --card-foreground: oklch(0.93 0.03 85);
+  --popover: oklch(0.15 0.008 60);
+  --popover-foreground: oklch(0.93 0.03 85);
+  --primary: oklch(0.78 0.15 85);
+  --primary-foreground: oklch(0.16 0.02 70);
+  --secondary: oklch(0.22 0.012 70);
+  --secondary-foreground: oklch(0.88 0.05 85);
+  --muted: oklch(0.21 0.01 70);
+  --muted-foreground: oklch(0.62 0.03 80);
+  --accent: oklch(0.25 0.03 85);
+  --accent-foreground: oklch(0.93 0.05 90);
+  --destructive: oklch(0.55 0.19 25);
+  --border: oklch(0.45 0.08 85);
+  --input: oklch(0.3 0.02 70);
+  --ring: oklch(0.78 0.15 85);
+  --chart-1: oklch(0.78 0.15 85);
+  --chart-2: oklch(0.65 0.1 60);
+  --chart-3: oklch(0.5 0.06 45);
+  --chart-4: oklch(0.85 0.1 90);
+  --chart-5: oklch(0.4 0.08 85);
+  --sidebar: oklch(0.16 0.008 60);
+  --sidebar-foreground: oklch(0.93 0.03 85);
+  --sidebar-primary: oklch(0.78 0.15 85);
+  --sidebar-primary-foreground: oklch(0.16 0.02 70);
+  --sidebar-accent: oklch(0.25 0.03 85);
+  --sidebar-accent-foreground: oklch(0.93 0.05 90);
+  --sidebar-border: oklch(0.45 0.08 85);
+  --sidebar-ring: oklch(0.78 0.15 85);
+}
+
+.dark {
+  --background: oklch(0.11 0.006 60);
+  --foreground: oklch(0.92 0.03 85);
+  --card: oklch(0.15 0.008 60);
+  --card-foreground: oklch(0.92 0.03 85);
+  --popover: oklch(0.14 0.008 60);
+  --popover-foreground: oklch(0.92 0.03 85);
+  --primary: oklch(0.78 0.15 85);
+  --primary-foreground: oklch(0.14 0.02 70);
+  --secondary: oklch(0.2 0.012 70);
+  --secondary-foreground: oklch(0.88 0.05 85);
+  --muted: oklch(0.19 0.01 70);
+  --muted-foreground: oklch(0.6 0.03 80);
+  --accent: oklch(0.24 0.03 85);
+  --accent-foreground: oklch(0.93 0.05 90);
+  --destructive: oklch(0.55 0.19 25);
+  --border: oklch(0.42 0.08 85);
+  --input: oklch(0.28 0.02 70);
+  --ring: oklch(0.78 0.15 85);
+  --chart-1: oklch(0.78 0.15 85);
+  --chart-2: oklch(0.65 0.1 60);
+  --chart-3: oklch(0.5 0.06 45);
+  --chart-4: oklch(0.85 0.1 90);
+  --chart-5: oklch(0.4 0.08 85);
+  --sidebar: oklch(0.15 0.008 60);
+  --sidebar-foreground: oklch(0.92 0.03 85);
+  --sidebar-primary: oklch(0.78 0.15 85);
+  --sidebar-primary-foreground: oklch(0.14 0.02 70);
+  --sidebar-accent: oklch(0.24 0.03 85);
+  --sidebar-accent-foreground: oklch(0.93 0.05 90);
+  --sidebar-border: oklch(0.42 0.08 85);
+  --sidebar-ring: oklch(0.78 0.15 85);
 }
 
 .dark {
@@ -118,9 +152,169 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+    letter-spacing: 0.01em;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Playfair Display", Georgia, serif;
   }
   button:not([disabled]),
   [role="button"]:not([disabled]) {
     cursor: pointer;
   }
+}
+
+/* ---------- VexelVerse Escape ornament & surface utilities ---------- */
+
+.font-display {
+  font-family: "Playfair Display", Georgia, serif;
+}
+.font-body {
+  font-family: "EB Garamond", Georgia, serif;
+}
+
+/* Deep salon wall with a faint candle-warm glow at the horizon */
+.vv-bg {
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(201, 162, 39, 0.12), transparent 60%),
+    radial-gradient(900px 420px at 85% 110%, rgba(201, 162, 39, 0.07), transparent 55%),
+    linear-gradient(180deg, #100d08 0%, #0c0a06 45%, #080604 100%);
+}
+
+/* Parchment letter, slightly foxed at the edges */
+.vv-parchment {
+  background: linear-gradient(165deg, #efe4c8 0%, #e7d8b4 60%, #dfcda2 100%);
+  color: #3b2a12;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* Hairline gold frame with a top highlight, like picture-rail moulding */
+.vv-gold-frame {
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  box-shadow:
+    0 1px 0 rgba(255, 215, 130, 0.14) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.5) inset,
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Brass plaque used for chapter labels, ribbons and room names */
+.vv-plaque {
+  background: linear-gradient(180deg, rgba(90, 68, 18, 0.55), rgba(58, 43, 12, 0.65));
+  border: 1px solid rgba(201, 162, 39, 0.55);
+  box-shadow: 0 1px 0 rgba(255, 222, 140, 0.25) inset, 0 -1px 0 rgba(0, 0, 0, 0.4) inset;
+}
+
+/* Ornamental rules — thin double line with a diamond at centre */
+.vv-rule {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.55), transparent);
+}
+.vv-rule::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: #c9a227;
+  box-shadow: 0 0 6px rgba(201, 162, 39, 0.6);
+}
+
+/* 3D viewport, one-point perspective room */
+.vv-scene {
+  perspective: 900px;
+  perspective-origin: 50% 45%;
+  background:
+    radial-gradient(560px 340px at 50% 62%, rgba(214, 178, 94, 0.16), transparent 70%),
+    radial-gradient(900px 600px at 50% 45%, #241c10 0%, #16110a 55%, #0b0906 100%);
+  overflow: hidden;
+}
+.vv-scene.light {
+  background:
+    radial-gradient(560px 340px at 50% 62%, rgba(240, 230, 200, 0.5), transparent 70%),
+    radial-gradient(900px 600px at 50% 45%, #cbb890 0%, #a8905f 55%, #6d5a35 100%);
+}
+
+/* Dim-aware wall shading inside the scene */
+.vv-wall {
+  background: linear-gradient(180deg, rgba(48, 38, 22, 0.92), rgba(28, 22, 12, 0.94));
+  border: 1px solid rgba(201, 162, 39, 0.16);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
+}
+.vv-scene.light .vv-wall {
+  background: linear-gradient(180deg, rgba(233, 221, 195, 0.92), rgba(210, 196, 165, 0.94));
+  border-color: rgba(120, 96, 40, 0.35);
+}
+
+.vv-wall-back {
+  background: radial-gradient(420px 260px at 50% 55%, rgba(70, 55, 30, 0.85), rgba(30, 24, 13, 0.9));
+}
+.vv-scene.light .vv-wall-back {
+  background: radial-gradient(420px 260px at 50% 55%, rgba(244, 236, 216, 0.9), rgba(214, 200, 168, 0.92));
+}
+
+/* Light switch flip: candles gutter out, walls go to near-black */
+.vv-blackout .vv-wall,
+.vv-blackout .vv-wall-back {
+  filter: brightness(0.13) saturate(0.5);
+}
+.vv-blackout .vv-wall-back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(320px 200px at 50% 55%, rgba(240, 236, 220, 0.1), transparent 70%);
+}
+
+/* Rectangular spotlight for the flashlight cone on wall glyphs */
+.vv-flashlight {
+  background: radial-gradient(
+    110px 74px at 50% 50%,
+    rgba(255, 244, 214, 0.95),
+    rgba(255, 240, 200, 0.55) 45%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Numbers stencilled on the wall — readable only under the flashlight */
+.vv-glyph {
+  color: rgba(240, 234, 216, 0.98);
+  text-shadow: 0 0 6px rgba(255, 250, 230, 0.9), 0 0 14px rgba(255, 244, 210, 0.6);
+  font-family: "EB Garamond", Georgia, serif;
+}
+
+/* 2D plan-drawing of the same room */
+.vv-blueprint {
+  background:
+    repeating-linear-gradient(0deg, rgba(201, 162, 39, 0.07) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(201, 162, 39, 0.07) 0 1px, transparent 1px 28px),
+    linear-gradient(180deg, rgba(34, 27, 16, 0.5), rgba(24, 19, 11, 0.6));
+}
+
+/* Gold set-dressing for the 3D room */
+.vv-chandelier {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  width: 16px;
+  height: 16px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: radial-gradient(circle, #ffe9a8 0%, #d9a92f 55%, rgba(160, 118, 24, 0) 75%);
+  box-shadow: 0 0 22px 8px rgba(222, 184, 76, 0.4), 0 0 60px 24px rgba(222, 184, 76, 0.12);
+}
+.vv-drape {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.05), rgba(201, 162, 39, 0.22), rgba(201, 162, 39, 0.05));
+}
+
+/* Silence screen readers announce nothing twice; keep decorative layers out of tab order */
+.vv-decor {
+  pointer-events: none;
+  user-select: none;
 }
