@@ -1,4 +1,4 @@
-// Shared types for the VexelVerse Escape engine. The engine is deliberately
+// Shared types for the Vexelverse Escape engine. The engine is deliberately
 // framework-free: a single reducer owns the entire run state, which is what
 // makes dimension flips, light flips and the half-solved memory trick honest.
 

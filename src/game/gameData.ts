@@ -1,4 +1,4 @@
-// The twelve rooms of the VexelVerse. Every answer is derivable from props the
+// The twelve rooms of the Vexelverse. Every answer is derivable from props the
 // player can actually inspect — nothing is guess-the-teacher's-pet. Design
 // rules the engine enforces:
 //   * every puzzle is hosted on exactly one prop (puzzleId),
@@ -11,7 +11,7 @@ export const ROOMS: RoomDef[] = [
   {
     slug: "gatehouse",
     title: "The Gatehouse",
-    tagline: "Where every VexelVerse story begins",
+    tagline: "Where every Vexelverse story begins",
     difficulty: "Apprentice",
     parMinutes: 5,
     briefing:

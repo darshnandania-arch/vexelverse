@@ -42,7 +42,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* VexelVerse Escape — black & gold, old-timey salon theme */
+/* Vexelverse Escape — black & gold, old-timey salon theme */
 :root {
   --radius: 0.375rem;
   --background: oklch(0.13 0.008 70);
@@ -167,7 +167,7 @@
   }
 }
 
-/* ---------- VexelVerse Escape ornament & surface utilities ---------- */
+/* ---------- Vexelverse Escape ornament & surface utilities ---------- */
 
 .font-display {
   font-family: "Playfair Display", Georgia, serif;

@@ -18,7 +18,7 @@ export default function Landing() {
           <Link to="/" className="flex items-baseline gap-2">
             <KeyRound className="size-5 text-gold-400" />
             <span className="font-display text-xl tracking-wide text-gold-300">
-              VexelVerse Escape
+              Vexelverse Escape
             </span>
           </Link>
           <nav className="flex items-center gap-2">
@@ -57,7 +57,8 @@ export default function Landing() {
           <p className="mx-auto mt-6 max-w-2xl font-body text-lg leading-relaxed text-amber-100/80">
             Twelve chambers in a house that rewards patience. Turn the room
             from relief to plan, light it or douse it, and read the clues each
-            state alone reveals. The door opens for those who take the time.
+            state alone reveals. Built for anyone who enjoys being stumped
+            properly — no quick fingers required, only a settled mind.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg" className="bg-gold-600 font-body text-black hover:bg-gold-500">
@@ -149,8 +150,9 @@ export default function Landing() {
           <h2 className="font-display text-3xl text-gold-200">Escape, and be paid in gold</h2>
           <p className="mx-auto mt-3 max-w-xl font-body text-amber-100/75">
             Every recorded escape earns gold and standing — faster times and
-            cleaner runs pay more. Spend gold in the Emporium; standing raises
-            your rank in the house.
+            cleaner runs pay more. The house keeps a ledger for anyone willing
+            to be tested, from first-time players to the vault's most stubborn
+            regulars.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild className="bg-gold-600 font-body text-black hover:bg-gold-500">
@@ -167,7 +169,7 @@ export default function Landing() {
 
       <footer className="border-t border-gold-500/25 py-8 text-center">
         <p className="font-body text-xs uppercase tracking-[0.35em] text-muted-foreground">
-          VexelVerse Escape · think. act. solve.
+          Vexelverse Escape · think. act. solve.
         </p>
       </footer>
     </main>
