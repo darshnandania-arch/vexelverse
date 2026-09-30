@@ -747,10 +747,168 @@ export const ROOMS: RoomDef[] = [
       },
     ],
     gates: ["curtain", "crank_well"],
+    restrictions: { noHints: true, noThirdPerson: true },
+    chambers: [
+      {
+        slug: "workshop",
+        title: "The Property Master's Workshop",
+        epigraph: "where the puppets are strung",
+        parMinutes: 15,
+        props: [
+          {
+            id: "string_drawer",
+            wall: "back",
+            label: "String drawer",
+            glyph: "🧵",
+            flavor: "A shallow drawer of spare strings, labelled by puppet.",
+            puzzleId: "string_tally",
+            inspect:
+              "Five labels: Lion, Soldier, Queen, Dragon — and one worn blank. The Soldier's bundle holds three strings; every other bundle holds five.",
+          },
+          {
+            id: "wax_block",
+            wall: "left",
+            label: "Wax block",
+            glyph: "🕯",
+            flavor: "A block of casting wax, thumb-marked.",
+            requires: { light: ["dark"] },
+            inspect:
+              "By flashlight, pinpricks through the wax spell three numerals: 3, 1, 4.",
+          },
+          {
+            id: "spare_heads",
+            wall: "right",
+            label: "Spare heads shelf",
+            glyph: "🗿",
+            flavor: "Spare puppet heads, arranged by height.",
+            requires: { dimension: ["3d"] },
+            inspect:
+              "Only in relief can you see the shelf's underside: a chalk tally — four heads up, two heads down.",
+          },
+          {
+            id: "paint_cabinet",
+            wall: "exit",
+            label: "Paint cabinet",
+            glyph: "🎨",
+            flavor: "A cabinet of pigments, locked with a wheel combination.",
+            puzzleId: "wax_lock",
+            inspect: "The wheel wants three numerals.",
+          },
+        ],
+        puzzles: [
+          {
+            id: "string_tally",
+            kind: "code",
+            prompt:
+              "How many strings are missing from the Soldier's bundle, compared to the others?",
+            flavor: "Every bundle holds five; the Soldier's holds three.",
+            answer: "2",
+            confirmLine: "two strings short — the same two that were cut",
+          },
+          {
+            id: "wax_lock",
+            kind: "code",
+            prompt: "The paint cabinet's wheel wants the wax pinpricks' numerals, in order.",
+            flavor: "The wax block only confesses in the dark.",
+            answer: "314",
+            requires: { light: ["dark"] },
+            reward: "paint_key",
+            confirmLine: "three-one-four, pressed through wax",
+          },
+        ],
+        exitPuzzles: ["string_tally", "wax_lock"],
+        exit: {
+          prompt:
+            "The workshop door asks for the missing strings, then the cabinet's numerals.",
+          answer: "2314",
+        },
+      },
+      {
+        slug: "dressing_room",
+        title: "The Dressing Room",
+        epigraph: "where the mirror doubles the cast",
+        parMinutes: 20,
+        requires: "workshop",
+        props: [
+          {
+            id: "dressing_mirror",
+            wall: "back",
+            label: "Dressing mirror",
+            glyph: "🪞",
+            flavor: "A tall mirror ringed with broken bulbs.",
+            requires: { dimension: ["3d"] },
+            puzzleId: "mirror_cast",
+            inspect:
+              "Only in relief does the reflection hold the cast list: “Queen, Dragon, Lion, Soldier” — the mirror's own order.",
+          },
+          {
+            id: "costume_rail",
+            wall: "left",
+            label: "Costume rail",
+            glyph: "👘",
+            flavor: "Four costumes hang in the order they will be worn.",
+            inspect:
+              "The rail runs Lion, Soldier, Queen, Dragon — the prompt box's list, hung as fabric.",
+          },
+          {
+            id: "makeup_bench",
+            wall: "right",
+            label: "Make-up bench",
+            glyph: "💄",
+            flavor: " greasepaint sticks, each stamped with a letter.",
+            requires: { light: ["dark"] },
+            inspect:
+              "By flashlight the sticks' letters glow: Q, D. The chalk in the dark said the same.",
+          },
+          {
+            id: "cabinet_finale",
+            wall: "exit",
+            label: "Wing cabinet",
+            glyph: "🗄",
+            flavor: "A cabinet that wants the final running order.",
+            opensWith: ["paint_key"],
+            puzzleId: "finale_order",
+            inspect: "The cabinet's dial accepts a sequence of four.",
+          },
+        ],
+        puzzles: [
+          {
+            id: "mirror_cast",
+            kind: "sequence",
+            prompt:
+              "Set the cast in the order the mirror reflects them — the true order of the finale.",
+            flavor: "The mirror's order, not the prompt box's.",
+            choices: ["Queen", "Dragon", "Lion", "Soldier"],
+            answer: "Queen,Dragon,Lion,Soldier",
+            requires: { dimension: ["3d"] },
+            confirmLine: "the mirror's cast, in its own order",
+          },
+          {
+            id: "finale_order",
+            kind: "sequence",
+            prompt:
+              "Set the four scenes in the order the mirror, the rail and the chalk agree on.",
+            flavor:
+              "Cross the reflected cast, the hung costumes and the dark's correction.",
+            choices: ["Queen", "Dragon", "Lion", "Soldier"],
+            answer: "Queen,Dragon,Lion,Soldier",
+            confirmLine: "queen opens, soldier closes — the finale is set",
+          },
+        ],
+        exitPuzzles: ["mirror_cast", "finale_order"],
+        exit: {
+          prompt:
+            "The stage door takes the finale's first puppet, spelled out.",
+          answer: "queen",
+          accepts: ["queen"],
+        },
+      },
+    ],
     exit: {
-      prompt: "Name the puppet who closes the corrected play.",
-      answer: "dragon",
-      accepts: ["dragon"],
+      prompt:
+      "All chambers answered. Name the puppet who takes the final bow, spelled out.",
+      answer: "soldier",
+      accepts: ["soldier"],
     },
   },
   {
@@ -857,8 +1015,231 @@ export const ROOMS: RoomDef[] = [
       },
     ],
     gates: ["dome_shutter", "orrery", "dome_clock"],
+    restrictions: { noLightSwitch: true },
+    chambers: [
+      {
+        slug: "meridian",
+        title: "The Meridian Corridor",
+        epigraph: "where the transit clock never lies",
+        parMinutes: 12,
+        props: [
+          {
+            id: "transit_clock",
+            wall: "back",
+            label: "Transit clock",
+            glyph: "🕰",
+            flavor: "A 24-hour clock, whose hand is always true.",
+            puzzleId: "transit_reading",
+            inspect:
+              "The hand stands at 02:00 by any light. The dial warns: “The dome's clock is not this clock.”",
+          },
+          {
+            id: "meridian_wires",
+            wall: "left",
+            label: "Meridian wires",
+            glyph: "🕸",
+            flavor: "Crosshairs strung in the transit's focal plane.",
+            requires: { dimension: ["3d"] },
+            inspect:
+              "In relief, seven wires cross; one is silk, the rest are wire. The silk one is third from the top.",
+          },
+          {
+            id: "counterweights",
+            wall: "right",
+            label: "Counterweights",
+            glyph: "⚖",
+            flavor: "Iron weights on a rail, chalk-marked.",
+            requires: { light: ["dark"] },
+            inspect:
+              "By flashlight the chalk glows: “two light, five heavy.” The light ones are on the left.",
+          },
+          {
+            id: "corridor_gate",
+            wall: "exit",
+            label: "Corridor gate",
+            glyph: "🚪",
+            flavor: "A gate whose lock wants the transit's hour and the silk wire's count.",
+            puzzleId: "meridian_lock",
+            inspect: "Two dials: hours, then wires.",
+          },
+        ],
+        puzzles: [
+          {
+            id: "transit_reading",
+            kind: "code",
+            prompt: "What hour does the transit clock read, in hundreds?",
+            flavor: "The one clock in the house that never lies.",
+            answer: "0200",
+            accepts: ["200", "2"],
+            confirmLine: "two hundred hours, true as steel",
+          },
+          {
+            id: "meridian_lock",
+            kind: "code",
+            prompt:
+              "The gate wants the silk wire's position counted from the top.",
+            flavor: "Only relief shows which wire is silk.",
+            answer: "3",
+            requires: { dimension: ["3d"] },
+            reward: "meridian_key",
+            confirmLine: "the third wire is silk",
+          },
+        ],
+        exitPuzzles: ["transit_reading", "meridian_lock"],
+        exit: {
+          prompt: "The corridor gate asks: hour, then wire. In hundreds, then singly.",
+          answer: "02003",
+          accepts: ["2003"],
+        },
+      },
+      {
+        slug: "plate_stack",
+        title: "The Plate Vault",
+        epigraph: "where the sky is kept on glass",
+        parMinutes: 18,
+        requires: "meridian",
+        props: [
+          {
+            id: "plate_cabinet",
+            wall: "back",
+            label: "Photographic plates",
+            glyph: "🖼",
+            flavor: "Glass plates of the sky, filed by date.",
+            requires: { dimension: ["3d"] },
+            inspect:
+              "In relief, the plates show Jupiter on three nights: two moons, then four, then two. The middle plate is misfiled.",
+          },
+          {
+            id: "plate_ledger",
+            wall: "left",
+            label: "Plate ledger",
+            glyph: "📒",
+            flavor: "The vault's borrowing book.",
+            inspect:
+              "“Three plates borrowed, one returned late.” No names are entered.",
+          },
+          {
+            id: "red_lamp",
+            wall: "right",
+            label: "Red darkroom lamp",
+            glyph: "🔴",
+            flavor: "The only lamp allowed in a plate vault.",
+            requires: { light: ["dark"] },
+            inspect:
+              "Under red light, the ledger's margin shows: “the misfiled plate is the third.”",
+          },
+          {
+            id: "plate_safe",
+            wall: "exit",
+            label: "Plate safe",
+            glyph: "🔐",
+            flavor: "A safe that wants the misfiled plate's position and the transit's hour.",
+            opensWith: ["meridian_key"],
+            puzzleId: "plate_safe_lock",
+            inspect: "The safe's dial waits on two figures.",
+          },
+        ],
+        puzzles: [
+          {
+            id: "plate_safe_lock",
+            kind: "code",
+            prompt:
+              "The safe wants the misfiled plate's position, then the transit's hour in hundreds.",
+            flavor: "The red lamp found the plate; the corridor's clock gave the hour.",
+            answer: "30200",
+            accepts: ["3200"],
+            requires: { light: ["dark"] },
+            reward: "plate_key",
+            confirmLine: "the third plate, at two hundred hours",
+          },
+        ],
+        exitPuzzles: ["plate_safe_lock"],
+        exit: {
+          prompt: "The vault door repeats the safe's figures back to you.",
+          answer: "30200",
+          accepts: ["3200"],
+        },
+      },
+      {
+        slug: "dome_floor",
+        title: "The Dome Floor",
+        epigraph: "where the great refractor waits",
+        parMinutes: 15,
+        requires: "plate_stack",
+        props: [
+          {
+            id: "refractor",
+            wall: "back",
+            label: "Great refractor",
+            glyph: "🔭",
+            flavor: "The telescope itself, uncapped at last.",
+            requires: { dimension: ["3d"] },
+            puzzleId: "visual_moons",
+            inspect:
+              "In relief, through the eyepiece: two moons ride high. The chart was honest after all.",
+          },
+          {
+            id: "dome_rotation",
+            wall: "left",
+            label: "Dome rotation drum",
+            glyph: "🎡",
+            flavor: "The drum that turns the dome to the sky.",
+            requires: { dimension: ["2d"] },
+            inspect:
+              "Only the plan shows the drum's markings: three slots, the middle one wider.",
+          },
+          {
+            id: "shutter_wheel",
+            wall: "right",
+            label: "Shutter wheel",
+            glyph: "🔧",
+            flavor: "The wheel that opens the dome's mouth.",
+            requires: { light: ["dark"] },
+            inspect:
+              "By flashlight, a chalk arrow: “the wide slot takes the wire.”",
+          },
+          {
+            id: "final_lock",
+            wall: "exit",
+            label: "Final lock",
+            glyph: "🗝",
+            flavor: "The dome's last lock, wanting the sky's answer.",
+            opensWith: ["plate_key"],
+            puzzleId: "final_lock",
+            inspect: "It wants the corrected hour, as the almanac says.",
+          },
+        ],
+        puzzles: [
+          {
+            id: "visual_moons",
+            kind: "choice",
+            prompt: "Which moons ride high, as the refractor shows it?",
+            flavor: "Your own eye, through the glass.",
+            choices: ["I and III", "II and IV", "I and II"],
+            answer: "I and III",
+            accepts: ["i and iii", "i, iii", "i iii"],
+            confirmLine: "the first and third, seen at last",
+          },
+          {
+            id: "final_lock",
+            kind: "code",
+            prompt:
+              "The dome opens at the corrected hour, in hundreds.",
+            flavor: "The dome clock ran nine minutes fast; the note knew it.",
+            answer: "1200",
+            confirmLine: "midnight, truly",
+          },
+        ],
+        exitPuzzles: ["visual_moons", "final_lock"],
+        exit: {
+          prompt: "The dome's mouth opens on the corrected hour.",
+          answer: "1200",
+        },
+      },
+    ],
     exit: {
-      prompt: "Enter the corrected hour in hundreds, as the almanac instructs.",
+      prompt:
+        "All chambers answered. Enter the corrected hour in hundreds, one last time.",
       answer: "1200",
     },
   },

@@ -190,6 +190,7 @@ export const recordRun = mutation({
     hintsUsed: v.number(),
     lightDark: v.string(),
     finalDimension: v.string(),
+    chambersCleared: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -214,10 +215,14 @@ export const recordRun = mutation({
 
     const base =
       args.outcome === "escaped" ? 60 + Math.round(args.parSeconds / 12) : 10;
+    const chamberBonus = Math.max(0, (args.chambersCleared ?? 0) - 1) * 40;
     if (profile.currentStreak >= 2) multiplier += 0.1;
     if (profile.equipped === "heirloom_key") multiplier += 0.1;
 
-    const goldEarned = Math.max(5, Math.round(base * multiplier));
+    const goldEarned = Math.max(
+      5,
+      Math.round((base + chamberBonus) * multiplier),
+    );
     const xpEarned =
       args.outcome === "escaped"
         ? Math.max(25, Math.round(args.parSeconds / 10))

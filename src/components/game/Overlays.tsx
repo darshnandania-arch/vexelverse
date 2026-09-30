@@ -36,6 +36,12 @@ export function IntroOverlay({
         <p className="mt-3 font-body text-xs italic text-[#7a5c2a]">
           {room.setting}
         </p>
+        {room.chambers && room.chambers.length > 0 && (
+          <p className="mt-3 font-body text-xs uppercase tracking-[0.2em] text-[#8a6d2f]">
+            {room.chambers.length} chambers lie beyond the inner door — clear
+            each in turn
+          </p>
+        )}
         <Button
           className="mt-6 w-full bg-[#8a6d2f] font-body text-[#f5edd8] hover:bg-[#a3823a]"
           onClick={onBegin}
@@ -145,6 +151,34 @@ export function HintDialog({
   const steps = WALKTHROUGHS[room.slug] ?? [];
   const revealed = state.hintsUsed;
   const freeUsed = Math.min(2, revealed);
+  const sealed = room.restrictions?.noHints === true;
+
+  if (sealed) {
+    return (
+      <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+        <DialogContent className="vv-gold-frame border-gold-500/40 bg-[#141009] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-gold-400">
+              The book is sealed
+            </DialogTitle>
+            <DialogDescription className="font-body text-amber-100/80">
+              For this round the house has taken the hint book away. Whatever
+              is answered here will be answered without help.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              className="font-body text-muted-foreground"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>

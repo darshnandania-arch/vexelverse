@@ -1,3 +1,4 @@
+import { ChamberGate } from "@/components/game/ChamberGate";
 import { HUD } from "@/components/game/HUD";
 import {
   CompletionDialog,
@@ -19,18 +20,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  createInitialState,
-  elapsedSeconds,
-  reducer,
-} from "@/game/engine";
+import { createInitialState, elapsedSeconds, reducer } from "@/game/engine";
 import { ROOMS_BY_SLUG } from "@/game/gameData";
 import { formatClock } from "@/game/shop";
 import type { PropDef } from "@/game/types";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { CheckCircle2, XCircle } from "lucide-react";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 export default function Play() {
@@ -49,6 +45,7 @@ export default function Play() {
   const [activeProp, setActiveProp] = useState<PropDef | null>(null);
   const [exitOpen, setExitOpen] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
+  const [wingOpen, setWingOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [recorded, setRecorded] = useState(false);
   const [reward, setReward] = useState<{ goldEarned: number; xpEarned: number } | null>(null);
@@ -69,11 +66,27 @@ export default function Play() {
     [room, state],
   );
 
-  const recordedRef = useRef(false);
+  // keyboard: A/D or arrows turn, W/S step, V swaps view
   useEffect(() => {
-    if (!state.finished || recordedRef.current) return;
-    recordedRef.current = true;
-  }, [state.finished]);
+    const onKey = (e: KeyboardEvent) => {
+      if (intro || state.finished) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "a" || e.key === "ArrowLeft") {
+        dispatch({ type: "turn", facing: "left" });
+      } else if (e.key === "d" || e.key === "ArrowRight") {
+        dispatch({ type: "turn", facing: "right" });
+      } else if (e.key === "w" || e.key === "ArrowUp") {
+        dispatch({ type: "stepForward" });
+      } else if (e.key === "s" || e.key === "ArrowDown") {
+        dispatch({ type: "stepBack" });
+      } else if (e.key === "v") {
+        dispatch({ type: "setPerson", person: state.person === "1st" ? "3rd" : "1st" });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [intro, state.finished, state.person]);
 
   const handleRecord = useCallback(async () => {
     if (!room || !state.finished || !isAuthenticated) return;
@@ -90,13 +103,14 @@ export default function Play() {
         hintsUsed: state.hintsUsed,
         lightDark: state.light,
         finalDimension: state.dimension,
+        chambersCleared: state.chambersCleared.length,
       });
       setReward(result);
     } catch (e) {
       setRecordError(e instanceof Error ? e.message : "Recording failed");
       setRecorded(false);
     }
-  }, [room, state.finished, state.hintsUsed, state.light, state.dimension, isAuthenticated, recordRun, parSeconds]);
+  }, [room, state.finished, state.hintsUsed, state.light, state.dimension, state.chambersCleared, isAuthenticated, recordRun, parSeconds]);
 
   const showToast = useCallback((message: string) => {
     setToast(message);
@@ -127,6 +141,24 @@ export default function Play() {
         state.opened.includes(gate) ||
         state.solved.includes(gate),
     );
+  const chambers = room.chambers ?? [];
+  const total =
+    room.puzzles.length +
+    chambers.reduce((sum, c) => sum + c.puzzles.length, 0);
+  const wingComplete = chambers.every((c) =>
+    state.chambersCleared.includes(c.slug),
+  );
+  const activeChamber = chambers.find((c) => c.slug === state.activeChamber);
+  const scopeProps = activeChamber ? activeChamber.props : room.props;
+  const scopePuzzles = activeChamber ? activeChamber.puzzles : room.puzzles;
+  const scopeRoom = activeChamber
+    ? { ...room, props: scopeProps, puzzles: scopePuzzles }
+    : room;
+
+  const handleProp = (prop: PropDef) => {
+    setActiveProp(prop);
+    dispatch({ type: "inspect", propId: prop.id });
+  };
 
   return (
     <main className="vv-bg flex min-h-screen flex-col">
@@ -135,7 +167,10 @@ export default function Play() {
           <Link to="/rooms" className="font-body text-xs uppercase tracking-[0.3em] text-gold-500/70 hover:text-gold-400">
             ← The house
           </Link>
-          <span className="font-display text-lg text-gold-300">{room.title}</span>
+          <span className="font-display text-lg text-gold-300">
+            {room.title}
+            {activeChamber ? ` — ${activeChamber.title}` : ""}
+          </span>
         </div>
         <HUD
           room={room}
@@ -145,6 +180,10 @@ export default function Play() {
           onToggleDimension={() => dispatch({ type: "toggleDimension" })}
           onSetLight={(light) => dispatch({ type: "setLight", light })}
           onToggleFlashlight={() => dispatch({ type: "toggleFlashlight" })}
+          onSetPerson={(person) => dispatch({ type: "setPerson", person })}
+          onTurn={(facing) => dispatch({ type: "turn", facing })}
+          onStepForward={() => dispatch({ type: "stepForward" })}
+          onStepBack={() => dispatch({ type: "stepBack" })}
           onHint={() => {
             dispatch({ type: "hint", puzzleId: "walkthrough" });
             setHintOpen(true);
@@ -155,31 +194,30 @@ export default function Play() {
       </div>
 
       <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 gap-4 px-4 pb-6 lg:grid-cols-[1fr_260px]">
-        <div className="vv-gold-frame relative h-[520px] overflow-hidden rounded-sm">
+        <div className="vv-gold-frame relative h-[540px] overflow-hidden rounded-sm">
           {state.dimension === "3d" ? (
             <Scene3D
-              room={room}
+              key={activeChamber?.slug ?? "main"}
+              room={scopeRoom}
               light={state.light}
               flashlight={state.flashlight}
-              dimension={state.dimension}
+              person={state.person}
+              facing={state.facing}
+              step={state.step}
               opened={state.opened}
               inspected={state.inspected}
-              onProp={(prop) => {
-                setActiveProp(prop);
-                dispatch({ type: "inspect", propId: prop.id });
-              }}
+              onProp={handleProp}
             />
           ) : (
             <Scene2D
-              room={room}
+              room={scopeRoom}
               light={state.light}
               flashlight={state.flashlight}
+              facing={state.facing}
+              step={state.step}
               opened={state.opened}
               inspected={state.inspected}
-              onProp={(prop) => {
-                setActiveProp(prop);
-                dispatch({ type: "inspect", propId: prop.id });
-              }}
+              onProp={handleProp}
             />
           )}
           {intro && (
@@ -201,15 +239,37 @@ export default function Play() {
         </div>
 
         <aside className="flex flex-col gap-3">
+          {chambers.length > 0 && (
+            <div className="vv-gold-frame rounded-sm bg-black/50 p-3">
+              <h3 className="font-display text-sm uppercase tracking-[0.25em] text-gold-400">
+                The wing
+              </h3>
+              <p className="mt-1 font-body text-xs text-amber-100/75">
+                {wingComplete
+                  ? "Every chamber is answered. The room's own door will now listen."
+                  : activeChamber
+                    ? `You are in the ${activeChamber.title}. ${state.chambersCleared.length}/${chambers.length} chambers cleared.`
+                    : `${state.chambersCleared.length}/${chambers.length} chambers cleared. The inner door waits.`}
+              </p>
+              <Button
+                size="sm"
+                className="mt-2 w-full bg-gold-600 font-body text-xs text-black hover:bg-gold-500"
+                onClick={() => setWingOpen(true)}
+              >
+                {activeChamber ? "Switch chamber" : "The inner door"}
+              </Button>
+            </div>
+          )}
           <Satchel state={state} equipped={profile?.equipped} />
           <div className="vv-gold-frame rounded-sm bg-black/50 p-3">
             <h3 className="font-display text-sm uppercase tracking-[0.25em] text-gold-400">
               Standing
             </h3>
             <div className="mt-2 space-y-1 font-body text-xs text-amber-100/85">
-              <p>{state.solved.length} of {room.puzzles.length} mechanisms solved</p>
+              <p>{state.solved.length} of {total} mechanisms solved</p>
               <p>{state.hintsUsed} hints taken</p>
               <p>Dimension: {state.dimension === "3d" ? "3D relief" : "2D plan"}</p>
+              <p>View: {state.person === "1st" ? "first person" : "third person"}</p>
               <p>Light: {state.light}</p>
             </div>
           </div>
@@ -226,7 +286,7 @@ export default function Play() {
 
       {activeProp && (
         <PropDialog
-          room={room}
+          room={scopeRoom}
           prop={activeProp}
           state={state}
           open={true}
@@ -234,7 +294,7 @@ export default function Play() {
           onInspect={(propId) => dispatch({ type: "inspect", propId })}
           onOpen={(propId) => {
             dispatch({ type: "open", propId });
-            const prop = room.props.find((p) => p.id === propId);
+            const prop = scopeProps.find((p) => p.id === propId);
             const got = (prop?.yields ?? []).filter(
               (y) => !state.inventory.includes(y),
             );
@@ -246,11 +306,35 @@ export default function Play() {
           }}
           onSolve={(puzzleId) => {
             dispatch({ type: "solve", puzzleId });
-            showToast("A mechanism gives way.");
+            const chamber = chambers.find((c) =>
+              c.exitPuzzles.includes(puzzleId) &&
+              c.exitPuzzles.every((id) =>
+                id === puzzleId
+                  ? true
+                  : state.solved.includes(id),
+              ),
+            );
+            if (chamber && activeChamber?.slug === chamber.slug) {
+              dispatch({ type: "clearChamber", chamber: chamber.slug });
+              showToast(`The ${chamber.title} is answered.`);
+            } else {
+              showToast("A mechanism gives way.");
+            }
           }}
           onPuzzleBlocked={(reason) => showToast(reason)}
         />
       )}
+
+      <ChamberGate
+        chambers={chambers}
+        state={state}
+        open={wingOpen}
+        onClose={() => setWingOpen(false)}
+        onEnter={(chamber) => {
+          dispatch({ type: "enterChamber", chamber });
+          setActiveProp(null);
+        }}
+      />
 
       <ExitDialog
         room={room}
@@ -261,7 +345,7 @@ export default function Play() {
           dispatch({ type: "exit", now: Date.now() });
           setExitOpen(false);
         }}
-        gated={!gatesOpen}
+        gated={!gatesOpen || !wingComplete}
       />
 
       <HintDialog
@@ -275,8 +359,8 @@ export default function Play() {
       <Dialog open={toast !== null} onOpenChange={(n) => !n && setToast(null)}>
         <DialogContent className="vv-gold-frame max-w-sm border-gold-500/40 bg-[#141009] sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-display text-lg text-gold-300">
-              <CheckCircle2 className="size-4" /> Noted
+            <DialogTitle className="font-display text-lg text-gold-300">
+              Noted
             </DialogTitle>
             <DialogDescription className="font-body text-amber-100/85">
               {toast}
@@ -292,9 +376,6 @@ export default function Play() {
               Continue
             </Button>
           </DialogFooter>
-          <div className="sr-only">
-            <XCircle />
-          </div>
         </DialogContent>
       </Dialog>
     </main>

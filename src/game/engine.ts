@@ -1,5 +1,6 @@
 import { ROOMS_BY_SLUG } from "./gameData";
 import type {
+  ChamberDef,
   GameAction,
   GameState,
   Light,
@@ -9,6 +10,15 @@ import type {
 import { journalLineFor } from "./types";
 
 export const MAX_HINTS = 4;
+export const MAX_STEP = 3;
+
+/** The house may confiscate a feature for the round. */
+export function restrictionBlocked(
+  room: RoomDef,
+  feature: keyof NonNullable<RoomDef["restrictions"]>,
+): boolean {
+  return Boolean(room.restrictions?.[feature]);
+}
 
 export function isPropVisible(
   prop: PropDef,
@@ -47,7 +57,7 @@ export function createInitialState(
 ): GameState {
   const now = Date.now();
   return {
-    version: 1,
+    version: 2,
     roomSlug: room.slug,
     seed,
     startedAt: now,
@@ -56,10 +66,15 @@ export function createInitialState(
     dimension: "3d",
     light: "light",
     flashlight: false,
+    person: "1st",
+    facing: "back",
+    step: 0,
     inspected: [],
     opened: [],
     inventory: [],
     solved: [],
+    chambersCleared: [],
+    activeChamber: null,
     hintsUsed: 0,
     hintTarget: null,
     journal: [
@@ -69,7 +84,11 @@ export function createInitialState(
       },
       {
         at: now,
-        text: `Par for this room is ${room.parMinutes} minutes. The valet's hint book offers four entries; the first two cost nothing but the ledger notes them all.`,
+        text: `Par for this room is ${room.parMinutes} minutes. ${
+          room.restrictions?.noHints
+            ? "The valet's hint book is sealed for this round."
+            : "The valet's hint book offers four entries; the first two cost nothing but the ledger notes them all."
+        }`,
       },
     ],
     exitOpen: false,
@@ -82,18 +101,32 @@ export function elapsedSeconds(state: GameState, now: number): number {
   return Math.floor(state.elapsedBeforePause + (live - state.startedAt) / 1000);
 }
 
-function gateOpenProp(
-  gate: string,
-  room: RoomDef,
-  state: GameState,
-): boolean {
-  const prop = room.props.find((p) => p.id === gate);
+function gateOpenProp(gate: string, room: RoomDef, state: GameState): boolean {
+  const allProps = [
+    ...room.props,
+    ...(room.chambers ?? []).flatMap((c) => c.props),
+  ];
+  const prop = allProps.find((p) => p.id === gate);
   if (!prop) return state.solved.includes(gate);
   return state.opened.includes(gate) || state.solved.includes(gate);
 }
 
 export function areGatesOpen(room: RoomDef, state: GameState): boolean {
-  return room.gates.every((gate) => gateOpenProp(gate, room, state));
+  const roomGates = room.gates.every((gate) => gateOpenProp(gate, room, state));
+  if (!roomGates) return false;
+  // wings must be fully answered before the room's own exit will answer
+  return (room.chambers ?? []).every((c) =>
+    state.chambersCleared.includes(c.slug),
+  );
+}
+
+export function areChamberRequirementsMet(
+  room: RoomDef,
+  chamber: ChamberDef,
+  state: GameState,
+): boolean {
+  if (!chamber.requires) return true;
+  return state.chambersCleared.includes(chamber.requires);
 }
 
 export function canOpenProp(
@@ -136,6 +169,15 @@ function grantYields(state: GameState, prop: PropDef): GameState {
   return { ...state, inventory: [...state.inventory, ...fresh] };
 }
 
+/** Props that live in a given chamber: the chamber's own list, or the room's. */
+function propsForScope(room: RoomDef, state: GameState): PropDef[] {
+  const chamber = state.activeChamber
+    ? room.chambers?.find((c) => c.slug === state.activeChamber)
+    : null;
+  if (chamber) return chamber.props;
+  return room.props;
+}
+
 export function reducer(state: GameState, action: GameAction): GameState {
   if (state.finished) return state;
   const room = ROOMS_BY_SLUG[state.roomSlug];
@@ -152,6 +194,7 @@ export function reducer(state: GameState, action: GameAction): GameState {
       return state;
 
     case "toggleDimension": {
+      if (restrictionBlocked(room, "noDimensionSwitch")) return state;
       return withJournal(
         {
           ...state,
@@ -163,10 +206,8 @@ export function reducer(state: GameState, action: GameAction): GameState {
     }
 
     case "setLight": {
-      return withJournal(
-        { ...state, light: action.light, flashlight: false },
-        action,
-      );
+      if (restrictionBlocked(room, "noLightSwitch")) return state;
+      return withJournal({ ...state, light: action.light, flashlight: false }, action);
     }
 
     case "toggleFlashlight": {
@@ -174,8 +215,50 @@ export function reducer(state: GameState, action: GameAction): GameState {
       return withJournal({ ...state, flashlight: !state.flashlight }, action);
     }
 
+    case "setPerson": {
+      if (
+        action.person === "3rd" &&
+        restrictionBlocked(room, "noThirdPerson")
+      ) {
+        return state;
+      }
+      return withJournal({ ...state, person: action.person }, action);
+    }
+
+    case "turn": {
+      if (restrictionBlocked(room, "noMovement")) return state;
+      return withJournal({ ...state, facing: action.facing }, action);
+    }
+
+    case "stepForward": {
+      if (restrictionBlocked(room, "noMovement")) return state;
+      if (state.activeChamber && state.step >= 1) return state;
+      if (!state.activeChamber && state.step >= MAX_STEP) return state;
+      return withJournal({ ...state, step: state.step + 1 }, action);
+    }
+
+    case "stepBack": {
+      if (restrictionBlocked(room, "noMovement") || state.step <= 0) return state;
+      return withJournal({ ...state, step: state.step - 1 }, action);
+    }
+
+    case "enterChamber": {
+      const chamber = room.chambers?.find((c) => c.slug === action.chamber);
+      if (!chamber) return state;
+      if (!areChamberRequirementsMet(room, chamber, state)) return state;
+      return withJournal(
+        {
+          ...state,
+          activeChamber: chamber.slug,
+          step: 0,
+          dimension: "3d",
+        },
+        action,
+      );
+    }
+
     case "inspect": {
-      const prop = room.props.find((p) => p.id === action.propId);
+      const prop = propsForScope(room, state).find((p) => p.id === action.propId);
       if (!prop || state.inspected.includes(prop.id)) return state;
       return withJournal(
         { ...state, inspected: [...state.inspected, prop.id] },
@@ -184,11 +267,9 @@ export function reducer(state: GameState, action: GameAction): GameState {
     }
 
     case "open": {
-      const prop = room.props.find((p) => p.id === action.propId);
+      const prop = propsForScope(room, state).find((p) => p.id === action.propId);
       if (!prop || state.opened.includes(prop.id)) return state;
-      if (!canOpenProp(prop, state, state.dimension, state.light).ok) {
-        return state;
-      }
+      if (!canOpenProp(prop, state, state.dimension, state.light).ok) return state;
       const opened = grantYields(
         { ...state, opened: [...state.opened, prop.id] },
         prop,
@@ -197,7 +278,11 @@ export function reducer(state: GameState, action: GameAction): GameState {
     }
 
     case "solve": {
-      const puzzle = room.puzzles.find((p) => p.id === action.puzzleId);
+      const allPuzzles = [
+        ...room.puzzles,
+        ...(room.chambers ?? []).flatMap((c) => c.puzzles),
+      ];
+      const puzzle = allPuzzles.find((p) => p.id === action.puzzleId);
       if (!puzzle || state.solved.includes(puzzle.id)) return state;
       if (!isPuzzleAvailable(room, puzzle.id, state.dimension, state.light)) {
         return state;
@@ -210,7 +295,26 @@ export function reducer(state: GameState, action: GameAction): GameState {
       return withJournal(next, action);
     }
 
+    case "clearChamber": {
+      const chamber = room.chambers?.find((c) => c.slug === action.chamber);
+      if (!chamber) return state;
+      if (state.chambersCleared.includes(chamber.slug)) return state;
+      const allAnswered = chamber.exitPuzzles.every((id) =>
+        state.solved.includes(id),
+      );
+      if (!allAnswered) return state;
+      return withJournal(
+        {
+          ...state,
+          chambersCleared: [...state.chambersCleared, chamber.slug],
+          activeChamber: null,
+        },
+        action,
+      );
+    }
+
     case "hint": {
+      if (restrictionBlocked(room, "noHints")) return state;
       if (state.hintsUsed >= MAX_HINTS) return state;
       return withJournal(
         { ...state, hintsUsed: state.hintsUsed + 1, hintTarget: action.puzzleId },

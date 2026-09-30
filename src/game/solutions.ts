@@ -133,14 +133,13 @@ export const WALKTHROUGHS: Record<string, WalkthroughStep[]> = {
   ],
   theatre: [
     {
-      label: "Inspect the rack in relief",
-      detail: "3D: the soldier's strings are cut — he never takes the stage again.",
+      label: "Answer the crank well in relief",
+      detail: "3D: the soldier's strings are cut — the riddle's answer is the Soldier → the well gives up the crank.",
     },
     {
-      label: "Answer the crank well",
-      detail: "The riddle's answer is the Soldier → the well gives up the crank.",
+      label: "Raise the curtain",
+      detail: "The curtain crank yields the playbill and opens the scene-order dial.",
     },
-    { label: "Raise the curtain", detail: "The curtain crank yields the playbill." },
     {
       label: "Read the prompt list in plan",
       detail: "2D: “Lion, Soldier, Queen, Dragon.”",
@@ -149,30 +148,48 @@ export const WALKTHROUGHS: Record<string, WalkthroughStep[]> = {
       label: "Correct it in the dark",
       detail: "Under-stage chalk: “Queen first. Dragon last.” → Queen, Lion, Soldier, Dragon.",
     },
-    { label: "Close the play", detail: "The corrected play closes on the Dragon." },
+    {
+      label: "The workshop — first chamber",
+      detail: "String drawer: every bundle holds five, the Soldier's holds three → missing = 2. Wax block (in the dark): pinpricks read 3, 1, 4 → the paint cabinet's wheel → paint_key. Wing door: 2 then 314 → 2314.",
+    },
+    {
+      label: "The dressing room — second chamber",
+      detail: "Mirror in relief reflects the true cast: Queen, Dragon, Lion, Soldier. Set that order on the mirror, then on the wing cabinet (opened with paint_key). Stage door: “queen”, spelled out.",
+    },
+    {
+      label: "Take the final bow",
+      detail: "The room exit asks for the puppet who takes the final bow — the Soldier, spelled out. The hint book is sealed in this room; study this card before you enter.",
+    },
   ],
   observatory: [
     {
-      label: "Look through the telescope in relief",
-      detail: "3D: Jupiter shows two moons, riding high — the first and the third.",
-    },
-    {
-      label: "Confirm on the chart",
-      detail: "The chart's note agrees: “tonight, only I and III ride high.” → answer I and III → brass wrench.",
+      label: "Verify the sky",
+      detail: "Telescope in relief, or the chart's note: “tonight, only I and III ride high” → answer I and III → brass wrench.",
     },
     {
       label: "Turn the nut from the plan",
       detail: "2D: with the wrench, the dome shutter yields.",
     },
     {
-      label: "Find the note in plan",
-      detail: "2D under the desk: the clock runs fast by nine minutes.",
+      label: "True the dome clock",
+      detail: "2D under the desk: the clock runs fast by nine minutes. 12:09 − 9 → 12:00 → in hundreds, 1200. (The exit will not take it yet — the wing stands between.)",
     },
     {
-      label: "True the time",
-      detail: "12:09 less nine minutes → 12:00 → in hundreds, 1200.",
+      label: "The meridian corridor — first chamber",
+      detail: "Transit clock reads 0200, the one clock that never lies. In relief, the third of seven wires is silk → meridian_lock 3 → meridian_key. Corridor gate: 0200 then 3 → 02003.",
     },
-    { label: "Open the dome", detail: "The gate takes 1200." },
+    {
+      label: "The plate vault — second chamber",
+      detail: "Plates in relief: two moons, then four, then two — the third plate is misfiled (the red lamp agrees). Safe (opened with meridian_key, in the dark): 3 then 0200 → 30200 → plate_key. Vault door: 30200.",
+    },
+    {
+      label: "The dome floor — third chamber",
+      detail: "Refractor in relief: I and III, seen at last. Final lock (opened with plate_key) takes the corrected hour → 1200. Dome mouth: 1200.",
+    },
+    {
+      label: "Open the dome for good",
+      detail: "The room exit takes the corrected hour in hundreds one last time: 1200. The chandelier is removed in this room — your lantern is the only light.",
+    },
   ],
   cistern: [
     {

@@ -227,8 +227,8 @@
 
 /* 3D viewport, one-point perspective room */
 .vv-scene {
-  perspective: 900px;
-  perspective-origin: 50% 45%;
+  perspective: 760px;
+  perspective-origin: 50% 42%;
   background:
     radial-gradient(560px 340px at 50% 62%, rgba(214, 178, 94, 0.16), transparent 70%),
     radial-gradient(900px 600px at 50% 45%, #241c10 0%, #16110a 55%, #0b0906 100%);
@@ -236,11 +236,11 @@
 }
 .vv-scene.light {
   background:
-    radial-gradient(560px 340px at 50% 62%, rgba(240, 230, 200, 0.5), transparent 70%),
-    radial-gradient(900px 600px at 50% 45%, #cbb890 0%, #a8905f 55%, #6d5a35 100%);
+    radial-gradient(700px 420px at 50% 55%, rgba(255, 240, 205, 0.34), transparent 72%),
+    radial-gradient(900px 600px at 50% 45%, #c8b183 0%, #a88e5c 55%, #6b5731 100%);
 }
 
-/* Dim-aware wall shading inside the scene */
+/* dim-aware wall shading inside the scene */
 .vv-wall {
   background: linear-gradient(180deg, rgba(48, 38, 22, 0.92), rgba(28, 22, 12, 0.94));
   border: 1px solid rgba(201, 162, 39, 0.16);
@@ -256,6 +256,97 @@
 }
 .vv-scene.light .vv-wall-back {
   background: radial-gradient(420px 260px at 50% 55%, rgba(244, 236, 216, 0.9), rgba(214, 200, 168, 0.92));
+}
+
+/* parquet boards for the walkable floor */
+.vv-parquet {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(201, 162, 39, 0.16) 0 1px, transparent 1px 14%),
+    repeating-linear-gradient(0deg, rgba(120, 92, 40, 0.14) 0 1px, transparent 1px 18%),
+    linear-gradient(180deg, rgba(52, 40, 22, 0.9), rgba(30, 23, 12, 0.92));
+  border: 1px solid rgba(201, 162, 39, 0.2);
+}
+.vv-scene.light .vv-parquet {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(96, 74, 32, 0.22) 0 1px, transparent 1px 14%),
+    repeating-linear-gradient(0deg, rgba(150, 122, 66, 0.18) 0 1px, transparent 1px 18%),
+    linear-gradient(180deg, rgba(226, 206, 166, 0.95), rgba(198, 176, 134, 0.95));
+  border-color: rgba(120, 96, 40, 0.35);
+}
+
+/* the moment the chandelier is lit: flash, then warm bloom */
+.vv-lightflash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 18%, rgba(255, 248, 225, 0.95), rgba(255, 240, 200, 0.35) 30%, transparent 62%);
+  animation: vv-flash 1.1s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes vv-flash {
+  0% { opacity: 0; }
+  14% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.vv-bloom {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  width: 340px;
+  height: 340px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 244, 214, 0.5) 0%, rgba(255, 236, 190, 0.18) 42%, transparent 70%);
+  pointer-events: none;
+}
+.vv-mote {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 240, 200, 0.55);
+  box-shadow: 0 0 6px rgba(255, 240, 200, 0.8);
+  animation: vv-drift 7s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes vv-drift {
+  from { transform: translate3d(0, 0, 0); opacity: 0.25; }
+  to { transform: translate3d(14px, -22px, 0); opacity: 0.7; }
+}
+
+/* the investigator avatar, seen from behind or above */
+.vv-avatar {
+  width: 13px;
+  height: 34px;
+  position: absolute;
+  transform-origin: 50% 90%;
+}
+.vv-avatar::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #d8c9a4, #b8a67e);
+}
+.vv-avatar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 12px;
+  height: 24px;
+  transform: translateX(-50%);
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(180deg, #2e2a22, #17140f);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.25);
+}
+.vv-avatar-shadow {
+  position: absolute;
+  width: 22px;
+  height: 7px;
+  border-radius: 9999px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.45), transparent 70%);
 }
 
 /* Light switch flip: candles gutter out, walls go to near-black */
