@@ -103,8 +103,8 @@ export function Scene2D({
             type="button"
             onClick={() => onProp(prop)}
             className={cn(
-              "group absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-sm border px-2.5 py-1.5 text-center transition-all",
-              "hover:scale-[1.08]",
+              "vv-plan-prop group absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-sm border px-2.5 py-1.5 text-center transition-all",
+              "cursor-pointer hover:scale-[1.08]",
               light === "light"
                 ? "border-[#8a6d2f]/60 bg-[#f5edd8]/85 hover:shadow-[0_0_14px_rgba(138,109,47,0.35)]"
                 : "border-gold-500/50 bg-[#10131f]/85 hover:shadow-[0_0_16px_rgba(201,162,39,0.35)]",

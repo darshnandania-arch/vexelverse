@@ -15,10 +15,10 @@ interface Scene3DProps {
 }
 
 const WALL_TRANSFORM: Record<Facing, string> = {
-  back: "translateX(-50%) translateZ(-300px)",
-  left: "translateX(-50%) rotateY(90deg) translateZ(-300px)",
-  right: "translateX(-50%) rotateY(-90deg) translateZ(-300px)",
-  exit: "translateX(-50%) rotateY(180deg) translateZ(-300px)",
+  back: "translateX(-50%) translateZ(-240px)",
+  left: "translateX(-50%) rotateY(26deg) translateZ(-240px)",
+  right: "translateX(-50%) rotateY(-26deg) translateZ(-240px)",
+  exit: "translateX(-50%) rotateY(-26deg) translateZ(-240px)",
 };
 
 /** prop anchor offsets inside a 600×340 wall panel */
@@ -37,7 +37,46 @@ function anchorFor(prop: PropDef): { left: string; top: string } {
   }
 }
 
-/** A wall panel with its props; props from other walls are hidden. */
+/** Props that hang on a given wall panel. Floor props live on the far wall and
+ *  the exit wall; side panels carry only their own side's props. */
+function propsForWall(room: RoomDef, wall: Facing): PropDef[] {
+  if (wall === "back") {
+    return room.props.filter((p) => p.wall === "back" || p.wall === "floor");
+  }
+  if (wall === "exit") {
+    return room.props.filter((p) => p.wall === "exit" || p.wall === "floor");
+  }
+  return room.props.filter((p) => p.wall === wall);
+}
+
+/** Floor props share one anchor, so spread them across the wall — otherwise
+ *  the last one renders on top of the others and the rest cannot be clicked. */
+function floorAnchorLeft(props: PropDef[], prop: PropDef): string {
+  const floorProps = props.filter((p) => p.wall === "floor");
+  const n = floorProps.length;
+  const idx = floorProps.findIndex((p) => p.id === prop.id);
+  if (n <= 1) return "50%";
+  const spread = (idx - (n - 1) / 2) * 22;
+  return `${Math.round(50 + spread)}%`;
+}
+
+/** Which wall panels to mount for the current facing: the one you look at,
+ *  plus its two neighbours rendered edge-on for depth. */
+function visibleWalls(facing: Facing): Facing[] {
+  switch (facing) {
+    case "back":
+      return ["back", "left", "right"];
+    case "exit":
+      return ["exit", "left", "right"];
+    case "left":
+      return ["left", "back", "exit"];
+    case "right":
+      return ["right", "back", "exit"];
+  }
+}
+
+/** A wall panel. The panel you face is flat, front-on and interactive; the
+ *  other two are pushed back edge-on and cannot catch clicks. */
 function WallPanel({
   wall,
   visibleFacing,
@@ -58,19 +97,27 @@ function WallPanel({
   chamberTitle?: string;
 }) {
   const isActive = wall === visibleFacing;
-  const wallProps = room.props.filter((p) => p.wall === wall || (wall === "exit" && p.wall === "floor"));
+  // side walls, when you face them, are shown front-on with a slight angle
+  const flatSide = isActive && (wall === "left" || wall === "right");
+  const transform = isActive
+    ? flatSide
+      ? `translateX(-50%) rotateY(${wall === "left" ? 9 : -9}deg)`
+      : "translateX(-50%)"
+    : WALL_TRANSFORM[wall];
+  const wallProps = isActive ? propsForWall(room, wall) : [];
 
   return (
     <div
       className={cn(
         "absolute left-1/2 top-[16%] h-[62%] w-[74%]",
-        wall === "back" && "vv-wall-back",
-        wall !== "back" && "vv-wall",
-        wall === "exit" && "vv-wall",
+        wall === "back" ? "vv-wall-back" : "vv-wall",
       )}
       style={{
-        transform: `${WALL_TRANSFORM[wall]} rotateY(${isActive ? 0 : 8}deg)`,
-        opacity: isActive ? 1 : 0.55,
+        transform: `${transform} rotateY(${isActive ? 0 : 8}deg)`,
+        opacity: isActive ? 1 : 0.3,
+        // neighbouring panels recede for depth but must never intercept clicks
+        // meant for the active wall — this was why clues could not be clicked
+        pointerEvents: isActive ? "auto" : "none",
         transition: "transform 420ms cubic-bezier(.2,.7,.3,1), opacity 300ms",
         backfaceVisibility: "hidden",
       }}
@@ -81,7 +128,7 @@ function WallPanel({
             <div className="vv-chandelier" />
           )}
           {wall === "exit" && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/1 rounded-sm border border-gold-500/40 bg-black/60 px-3 py-1.5">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-sm border border-gold-500/40 bg-black/60 px-3 py-1.5">
               <span className="font-body text-[10px] uppercase tracking-[0.25em] text-gold-400/80">
                 {chamberTitle ?? "the way out"}
               </span>
@@ -90,40 +137,43 @@ function WallPanel({
         </>
       )}
 
-      {isActive &&
-        wallProps.map((prop) => {
-          const visible = isPropVisible(prop, "3d", light);
-          if (!visible) return null;
-          const done = opened.includes(prop.id);
-          const seen = inspected.includes(prop.id);
-          const anchor = anchorFor(prop);
-          return (
-            <button
-              key={prop.id}
-              type="button"
-              onClick={() => onProp(prop)}
-              className={cn(
-                "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 rounded-sm border px-3 py-2 transition-all",
-                "hover:scale-[1.07] hover:shadow-[0_0_18px_rgba(201,162,39,0.4)]",
-                done
-                  ? "border-gold-500/25 opacity-50"
-                  : "border-gold-500/40 bg-black/45 backdrop-blur-[2px]",
-                light === "dark" && "border-gold-500/15 bg-black/70",
-              )}
-              style={{ left: anchor.left, top: anchor.top }}
-            >
-              <span className="text-lg leading-none">{prop.glyph ?? "•"}</span>
-              <span className="font-body text-[10px] leading-tight text-amber-100/90">
-                {prop.label}
+      {wallProps.map((prop) => {
+        const visible = isPropVisible(prop, "3d", light);
+        if (!visible) return null;
+        const done = opened.includes(prop.id);
+        const seen = inspected.includes(prop.id);
+        const anchor = anchorFor(prop);
+        const left =
+          prop.wall === "floor"
+            ? floorAnchorLeft(propsForWall(room, wall), prop)
+            : anchor.left;
+        return (
+          <button
+            key={prop.id}
+            type="button"
+            onClick={() => onProp(prop)}
+            className={cn(
+              "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 rounded-sm border px-3 py-2 transition-all",
+              "hover:scale-[1.07] hover:shadow-[0_0_18px_rgba(201,162,39,0.4)]",
+              done
+                ? "border-gold-500/25 opacity-50"
+                : "border-gold-500/40 bg-black/45 backdrop-blur-[2px]",
+              light === "dark" && "border-gold-500/15 bg-black/70",
+            )}
+            style={{ left, top: anchor.top }}
+          >
+            <span className="text-lg leading-none">{prop.glyph ?? "•"}</span>
+            <span className="font-body text-[10px] leading-tight text-amber-100/90">
+              {prop.label}
+            </span>
+            {seen && (
+              <span className="font-body text-[8px] uppercase tracking-widest text-amber-400/70">
+                seen
               </span>
-              {seen && (
-                <span className="font-body text-[8px] uppercase tracking-widest text-amber-400/70">
-                  seen
-                </span>
-              )}
-            </button>
-          );
-        })}
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -146,7 +196,7 @@ export function Scene3D({
     <div
       className={cn(
         "vv-scene relative h-full w-full",
-        light === "light" && "vv-scene.light",
+        light === "light" && "vv-scene light",
       )}
     >
       {light === "light" && (
@@ -167,46 +217,19 @@ export function Scene3D({
           transition: "transform 420ms cubic-bezier(.2,.7,.3,1)",
         }}
       >
-        <WallPanel
-          wall="back"
-          visibleFacing={facing}
-          room={room}
-          light={light}
-          opened={opened}
-          inspected={inspected}
-          onProp={onProp}
-          chamberTitle={chamber?.title}
-        />
-        <WallPanel
-          wall="left"
-          visibleFacing={facing}
-          room={room}
-          light={light}
-          opened={opened}
-          inspected={inspected}
-          onProp={onProp}
-          chamberTitle={chamber?.title}
-        />
-        <WallPanel
-          wall="right"
-          visibleFacing={facing}
-          room={room}
-          light={light}
-          opened={opened}
-          inspected={inspected}
-          onProp={onProp}
-          chamberTitle={chamber?.title}
-        />
-        <WallPanel
-          wall="exit"
-          visibleFacing={facing}
-          room={room}
-          light={light}
-          opened={opened}
-          inspected={inspected}
-          onProp={onProp}
-          chamberTitle={chamber?.title}
-        />
+        {visibleWalls(facing).map((wall) => (
+          <WallPanel
+            key={wall}
+            wall={wall}
+            visibleFacing={facing}
+            room={room}
+            light={light}
+            opened={opened}
+            inspected={inspected}
+            onProp={onProp}
+            chamberTitle={chamber?.title}
+          />
+        ))}
       </div>
 
       {person === "3rd" && (
@@ -234,7 +257,7 @@ export function Scene3D({
       <div className="pointer-events-none absolute inset-x-0 bottom-2 text-center">
         <span className="font-body text-[10px] uppercase tracking-[0.3em] text-gold-500/50">
           {person === "1st" ? "first person" : "third person"} · facing{" "}
-          {facing === "back" ? "the far wall" : facing}
+          {facing === "back" ? "the far wall" : facing === "exit" ? "the door" : `the ${facing} wall`}
         </span>
       </div>
     </div>

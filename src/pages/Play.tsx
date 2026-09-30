@@ -20,7 +20,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
-import { createInitialState, elapsedSeconds, reducer } from "@/game/engine";
+import {
+  areGatesOpen,
+  createInitialState,
+  elapsedSeconds,
+  reducer,
+} from "@/game/engine";
 import { ROOMS_BY_SLUG } from "@/game/gameData";
 import { formatClock } from "@/game/shop";
 import type { PropDef } from "@/game/types";
@@ -134,13 +139,6 @@ export default function Play() {
   }
 
   const remaining = parSeconds - elapsed;
-  const gatesOpen =
-    room.gates.length === 0 ||
-    room.gates.every(
-      (gate) =>
-        state.opened.includes(gate) ||
-        state.solved.includes(gate),
-    );
   const chambers = room.chambers ?? [];
   const total =
     room.puzzles.length +
@@ -148,6 +146,7 @@ export default function Play() {
   const wingComplete = chambers.every((c) =>
     state.chambersCleared.includes(c.slug),
   );
+  const gatesOpen = areGatesOpen(room, state);
   const activeChamber = chambers.find((c) => c.slug === state.activeChamber);
   const scopeProps = activeChamber ? activeChamber.props : room.props;
   const scopePuzzles = activeChamber ? activeChamber.puzzles : room.puzzles;
@@ -345,7 +344,7 @@ export default function Play() {
           dispatch({ type: "exit", now: Date.now() });
           setExitOpen(false);
         }}
-        gated={!gatesOpen || !wingComplete}
+        gated={!gatesOpen}
       />
 
       <HintDialog

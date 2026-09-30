@@ -395,6 +395,7 @@
   top: 7%;
   width: 16px;
   height: 16px;
+  pointer-events: none;
   transform: translateX(-50%);
   border-radius: 9999px;
   background: radial-gradient(circle, #ffe9a8 0%, #d9a92f 55%, rgba(160, 118, 24, 0) 75%);
@@ -408,4 +409,15 @@
 .vv-decor {
   pointer-events: none;
   user-select: none;
+}
+.vv-decor button,
+.vv-decor [role="button"],
+.vv-decor a {
+  pointer-events: auto;
+}
+
+/* Prop chips inside the plan: explicitly clickable (defence in depth against
+   inherited pointer-events:none from decorative containers). */
+.vv-plan-prop {
+  pointer-events: auto;
 }
