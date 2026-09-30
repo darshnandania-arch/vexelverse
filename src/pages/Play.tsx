@@ -71,21 +71,13 @@ export default function Play() {
     [room, state],
   );
 
-  // keyboard: A/D or arrows turn, W/S step, V swaps view
+  // keyboard: V swaps view; walking/looking is handled inside the 3D scene
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (intro || state.finished) return;
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
-      if (e.key === "a" || e.key === "ArrowLeft") {
-        dispatch({ type: "turn", facing: "left" });
-      } else if (e.key === "d" || e.key === "ArrowRight") {
-        dispatch({ type: "turn", facing: "right" });
-      } else if (e.key === "w" || e.key === "ArrowUp") {
-        dispatch({ type: "stepForward" });
-      } else if (e.key === "s" || e.key === "ArrowDown") {
-        dispatch({ type: "stepBack" });
-      } else if (e.key === "v") {
+      if (e.key === "v") {
         dispatch({ type: "setPerson", person: state.person === "1st" ? "3rd" : "1st" });
       }
     };
@@ -206,6 +198,18 @@ export default function Play() {
               opened={state.opened}
               inspected={state.inspected}
               onProp={handleProp}
+              onDoor={() => setExitOpen(true)}
+              paused={
+                intro ||
+                Boolean(state.finished) ||
+                activeProp !== null ||
+                wingOpen ||
+                exitOpen ||
+                hintOpen
+              }
+              onFacingChange={(f) => {
+                if (state.facing !== f) dispatch({ type: "turn", facing: f });
+              }}
             />
           ) : (
             <Scene2D

@@ -156,6 +156,7 @@ export function HUD({
           facing={state.facing}
           step={state.step}
           maxStep={state.activeChamber ? 1 : 3}
+          showPlanControls={state.dimension === "2d"}
           onSetPerson={onSetPerson}
           onTurn={onTurn}
           onStepForward={onStepForward}
